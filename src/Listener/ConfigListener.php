@@ -10,6 +10,7 @@
 namespace Zend\ModuleManager\Listener;
 
 use Traversable;
+use Throwable;
 use Zend\Config\Config;
 use Zend\Config\Factory as ConfigFactory;
 use Zend\EventManager\EventManagerInterface;
@@ -65,10 +66,17 @@ class ConfigListener extends AbstractListener implements
     public function __construct(ListenerOptions $options = null)
     {
         parent::__construct($options);
+
         if ($this->hasCachedConfig()) {
-            $this->skipConfig = true;
-            $this->setMergedConfig($this->getCachedConfig());
-        } else {
+            // Only load config if file contains valid array
+            $configFromCache = $this->getCachedConfig();
+            if ($configFromCache !== null) {
+                $this->skipConfig = true;
+                $this->setMergedConfig($configFromCache);
+            }
+        }
+
+        if (! $this->skipConfig) {
             $this->addConfigGlobPaths($this->getOptions()->getConfigGlobPaths());
             $this->addConfigStaticPaths($this->getOptions()->getConfigStaticPaths());
         }
@@ -388,6 +396,19 @@ class ConfigListener extends AbstractListener implements
      */
     protected function getCachedConfig()
     {
-        return include $this->getOptions()->getConfigCacheFile();
+        // Catch output to prevent malformed config to be returned to browser
+        ob_start(null, 0, PHP_OUTPUT_HANDLER_CLEANABLE | PHP_OUTPUT_HANDLER_REMOVABLE);
+        try {
+            $config = include $this->getOptions()->getConfigCacheFile();
+        } catch (Throwable $e) {
+            $config = null;
+        }
+        $output = ob_get_clean();
+
+        if (! empty($output) || ! is_array($config)) {
+            return null;
+        } else {
+            return $config;
+        }
     }
 }
