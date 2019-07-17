@@ -1,6 +1,6 @@
 {
-    "name": "zendframework/zend-modulemanager",
-    "description": "Modular application system for zend-mvc applications",
+    "name": "rutek/zend-modulemanager",
+    "description": "Modular application system for zend-mvc applications, fork of zendframework/zend-modulemanager",
     "license": "BSD-3-Clause",
     "keywords": [
         "zendframework",
@@ -71,5 +71,5 @@
         "test": "phpunit --colors=always",
         "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
     },
-    "homepage": "https://github.com/zendframework/zend-modulemanager"
+    "homepage": "https://github.com/rutek/zend-modulemanager"
 }
